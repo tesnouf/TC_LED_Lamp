@@ -199,6 +199,7 @@ void manual() {
 }
 
 //IF the mode is set to automatic then every 0.5 secs check the Light resistor reading.  If it is dark turn on the light, if it's light turn it off.
+// This may actually work better with an interrupt running on the LDR (google searhc Arduino interrupts)
 void automatic() {
   unsigned long currentMillisLDR = millis();
   if (currentMillisLDR - previousMillisLDR >= LDRinterval) {
