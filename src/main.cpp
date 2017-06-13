@@ -62,16 +62,22 @@ int ledState = LOW;
 unsigned long previousMillisLDR = 0;
 const long LDRinterval = 500;
 
+
+
 // void fadeToLevel(int toLevel);
 void fadeToLevel( int toLevel )
 {
 
     int delta = ( toLevel - currentLevel ) < 0 ? -1 : 1;
+    Serial.println(delta);
+    Serial.println(toLevel);
+    Serial.println(currentLevel);
 
     while ( currentLevel != toLevel ) {
         currentLevel += delta;
         // analogWrite( ledPin1, (int)(currentLevel / 100. * 255) );
-        analogWrite( ledPin1, (int)(currentLevel / 100 * 255) ); // test without decimal
+        analogWrite( ledPin1, (int)(currentLevel * 10.23) );
+        // analogWrite( ledPin1, (int)(currentLevel / 100 * 255) ); // test without decimal
         delay( FADE_DELAY );
     }
 }
@@ -89,7 +95,13 @@ void dimmerTransition() {
         Serial.println( currentLevel );
         fadeToLevel( requestedLevel );
 }
-
+void dimmer() {
+  if (currentLevel != toLevel) {
+  dimmerTransition();
+} else {
+  analogWrite( ledPin1, (int)(toLevel * 10.23) );
+}
+}
 
 void setup_wifi() {
 
@@ -151,7 +163,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   if (strTopic == "home/TC/Dimmer") {
     toLevel = intPayload;
-    dimmerTransition();
+    // dimmerTransition();
   }
 
 }
@@ -240,6 +252,7 @@ void automatic() {
   }
 }
 
+
 void setup() {
    // Add in setup notes to turn off station SSID broadcast
   WiFi.mode(WIFI_STA); // options WIFI_AP, WIFI_STA, or WIFI_AP_STA
@@ -247,6 +260,7 @@ void setup() {
   pinMode(BUILTIN_LED, OUTPUT); //Initialize the BUILTIN_LED pin as an output
   digitalWrite(BUILTIN_LED, HIGH); // Initialize the BUILTIN_LED pin as off
   pinMode(ledPin1, OUTPUT);     //Set the LED pin
+
   pinMode(LDRPin, INPUT);       //Set the LDR as an input
   Serial.begin(115200);
   setup_wifi();
@@ -278,7 +292,9 @@ void loop() {
   client.loop();
 
   if ( mode = "OFF") {
-    manual();
+    // manual();
+    dimmer();
+
   } else {
     automatic();
   }
