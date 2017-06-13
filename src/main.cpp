@@ -1,4 +1,5 @@
 
+// #include <Arduino.h>
 /*
    Connect to the network
    Subscribe to multiple MQTT channels
@@ -16,7 +17,7 @@ Rewritten and needs to be tested before a clean up is run
 */
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include <dimmer.h>
+#include "dimmer.h"
 
 
 /*
@@ -61,6 +62,7 @@ int ledState = LOW;
 unsigned long previousMillisLDR = 0;
 const long LDRinterval = 500;
 
+// void fadeToLevel(int toLevel);
 void fadeToLevel( int toLevel )
 {
 
@@ -68,7 +70,8 @@ void fadeToLevel( int toLevel )
 
     while ( currentLevel != toLevel ) {
         currentLevel += delta;
-        analogWrite( ledPin1, (int)(currentLevel / 100. * 255) );
+        // analogWrite( ledPin1, (int)(currentLevel / 100. * 255) );
+        analogWrite( ledPin1, (int)(currentLevel / 100 * 255) ); // test without decimal
         delay( FADE_DELAY );
     }
 }
@@ -106,11 +109,12 @@ void setup_wifi() {
       digitalWrite(BUILTIN_LED, HIGH);
     }
   }
-
+  #ifdef MY_DEBUG
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  #endif
 
 }
 
@@ -212,6 +216,9 @@ void manual() {
     case 2:
       flashing(); //Run the flashng function
       break;
+    // case 3:
+    //   fadeToLevel(int toLevel);
+    //   break;  // if this is enabled must comment out from callback and add in button in OpenHAB
   }
 
 }
