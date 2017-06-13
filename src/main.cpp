@@ -16,6 +16,7 @@ Rewritten and needs to be tested before a clean up is run
 */
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <dimmer.h>
 
 
 /*
