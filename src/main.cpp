@@ -31,9 +31,9 @@ Rewritten and needs to be tested before a clean up is run
 
 
 // Network Details
-const char* ssid = "NETGEAR85_2GEXT";
-const char* password = "cleverhat564";
-const char* mqtt_server = "192.168.1.7";
+const char* ssid = "TELUS1951";
+const char* password = "g2v6wt3a87";
+const char* mqtt_server ="192.168.1.73";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
