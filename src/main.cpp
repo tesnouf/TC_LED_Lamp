@@ -40,7 +40,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 int function;  //sets the light function
-String mode; // sets automatic or manual
+String mode = "OFF"; // sets automatic or manual
 int LDRValue;
 int LDRSetValue = 500;  // potentially goes from 0 - 1023  need to set this up and then see what values are returned in the serial monitor.
 
@@ -153,18 +153,22 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // This needs to be developed to grab the interger value form the payload and store it as the mode value
   if (strTopic == "home/TC/function") {
     function = intPayload;
+    // Serial.print( intPayload );
   }
 
   if (strTopic == "home/TC/modetype") {
     mode = strPayload;  //Likely that this will not work - need ot confirm that boolean and integer types are set up correctly...
+    // Serial.print( strPayload );
   }
 
   if (strTopic == "home/TC/LDRLimit") {
     LDRSetValue = intPayload * 10.23;  //grab the % value from the dimer nad convert to a 0-1023 value...
+    // Serial.print( intPayload );
   }
   if (strTopic == "home/TC/Dimmer") {
     toLevel = intPayload;
     // dimmerTransition();
+    // Serial.print( intPayload );
   }
 
 }
@@ -200,10 +204,11 @@ void reconnect() {
 void flashing() {
   unsigned long currentMillisLED = millis();
 
+
   if (currentMillisLED - previousMillisLED >= LEDinterval) {
     previousMillisLED = currentMillisLED;
-
-    if (ledState == LOW) {
+  // Serial.print("flashing setting run");
+    if (currentLevel < 100) {
       toLevel = 100;
       dimmer();
       ledState == HIGH;
@@ -219,18 +224,24 @@ void flashing() {
 
 // If the mode is set to Manual then run a case statement to work out which function determines the operating type.
 void manual() {
+  // Serial.print("manual setting run");
   // Do something with the LEDs based on the function value
   switch (function) {
+    Serial.print("switch setting run");
     case 0:
       // if (ledState == HIGH) {
       // digitalWrite(ledPin1, LOW);   // Turn the LED OFF at D7
-      analogWrite( ledPin1, 0 );
+      // analogWrite( ledPin1, 0 );
+      toLevel = 0;
+      dimmer();
       //}
       break;
     case 1:
       // if (ledState == LOW) {
       // digitalWrite(ledPin1, HIGH);   // Turn the LED ON at D7
-      analogWrite( ledPin1, 1023 );
+      // analogWrite( ledPin1, 1023 );
+      toLevel = 100;
+      dimmer();
       // }
       break;
     case 2:
@@ -246,6 +257,7 @@ void manual() {
 //IF the mode is set to automatic then every 0.5 secs check the Light resistor reading.  If it is dark turn on the light, if it's light turn it off.
 // This may actually work better with an interrupt running on the LDR (google searhc Arduino interrupts)
 void automatic() {
+  Serial.print("automatic setting run");
   unsigned long currentMillisLDR = millis();
   if (currentMillisLDR - previousMillisLDR >= LDRinterval) {
     previousMillisLDR = currentMillisLDR;
@@ -299,10 +311,9 @@ void loop() {
   // Loop through the MQTT function to get current values for variables.
   client.loop();
 
-  if ( mode = "OFF") {
+  if ( mode == "OFF") {
     // manual();
     dimmer();
-
   } else {
     manual();
   }
