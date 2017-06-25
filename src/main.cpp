@@ -30,6 +30,12 @@ Rewritten and needs to be tested before a clean up is run
 // Enable debug prints
 #define MY_DEBUG
 
+// delete this section and switch out the comments in config.h if this does not work
+const char* ssid = dSSID ;
+const char* password = dPASSWORD ;
+const char* mqtt_server = dMQTT_SERVER ;
+
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -50,7 +56,7 @@ int currentLevel;
 
 // LED Light timer Variables
 unsigned long previousMillisLED = 0;
-const long LEDinterval = 1000;
+const long LEDinterval = 2000;
 int ledState = LOW;
 
 //LDR Resistor timer variables
@@ -198,11 +204,16 @@ void flashing() {
     previousMillisLED = currentMillisLED;
 
     if (ledState == LOW) {
-      ledState = HIGH;
+      toLevel = 100;
+      dimmer();
+      ledState == HIGH;
     } else {
+      toLevel = 0;
       ledState = LOW;
+      dimmer();
     }
-    digitalWrite(ledPin1, ledState);
+    // digitalWrite(ledPin1, ledState);
+    // analogWrite( ledPin1, 0 );
   }
 }
 
@@ -212,12 +223,14 @@ void manual() {
   switch (function) {
     case 0:
       // if (ledState == HIGH) {
-      digitalWrite(ledPin1, LOW);   // Turn the LED OFF at D7
+      // digitalWrite(ledPin1, LOW);   // Turn the LED OFF at D7
+      analogWrite( ledPin1, 0 );
       //}
       break;
     case 1:
       // if (ledState == LOW) {
-      digitalWrite(ledPin1, HIGH);   // Turn the LED ON at D7
+      // digitalWrite(ledPin1, HIGH);   // Turn the LED ON at D7
+      analogWrite( ledPin1, 1023 );
       // }
       break;
     case 2:
@@ -291,7 +304,7 @@ void loop() {
     dimmer();
 
   } else {
-    automatic();
+    manual();
   }
 
 }
