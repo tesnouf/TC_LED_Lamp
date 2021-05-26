@@ -9,10 +9,8 @@
    mode variable determines the actions taken through the loop statement.
 
 
-GRRRRR I had this running then lost it all in a git upload... thought that was why git existed
-learnign experience that one!
-
-Rewritten and needs to be tested before a clean up is run
+TE May 25 -> see if we can simplify this and use the WiFi Manage r library to add in a way to manage  the MQTT and WiFi connections fomr the device instead of hard coding
+the passwords etc in...
 
 */
 #include <ESP8266WiFi.h>
