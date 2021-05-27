@@ -1,3 +1,5 @@
+
+// #include <Arduino.h>
 /*
    Connect to the network
    Subscribe to multiple MQTT channels
@@ -11,17 +13,10 @@ TE May 25 -> see if we can simplify this and use the WiFi Manage r library to ad
 the passwords etc in...
 
 */
-#include <Arduino.h>
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-//needed for library
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-// #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
+#include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-
 #include "dimmer.h"
-#include "defines.h"
+#include "config.h"
 
 
 /*
@@ -30,6 +25,13 @@ the passwords etc in...
   Aditional Variable ManMQTT boolean allows for the light to be controlled by MQTT messages OR by the LDR!
   Add in WiFi set up that turns off base station transmission
 */
+// Enable debug prints
+#define MY_DEBUG
+
+// delete this section and switch out the comments in config.h if this does not work
+const char* ssid = "dSSIS" ;
+const char* password = "passwd" ;
+const char* mqtt_server = "home" ;
 
 
 WiFiClient espClient;
@@ -59,6 +61,9 @@ int ledState = LOW;
 unsigned long previousMillisLDR = 0;
 const long LDRinterval = 500;
 
+
+
+// void fadeToLevel(int toLevel);
 void fadeToLevel( int toLevel )
 {
 
@@ -103,11 +108,24 @@ void setup_wifi() {
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
-    // // Connect to the local network
-  WiFiManager wifiManager;
-  //and goes into a blocking loop awaiting configuration
-  wifiManager.autoConnect("AutoConnectAP");
-  Serial.println("connected...to network :)");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    if (BUILTIN_LED == HIGH) {
+      digitalWrite(BUILTIN_LED, LOW);
+    } else {
+      digitalWrite(BUILTIN_LED, HIGH);
+    }
+  }
+  #ifdef MY_DEBUG
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  #endif
 
 }
 
@@ -254,7 +272,9 @@ void automatic() {
 
 
 void setup() {
-
+   // Add in setup notes to turn off station SSID broadcast
+  WiFi.mode(WIFI_STA); // options WIFI_AP, WIFI_STA, or WIFI_AP_STA
+  //WiFi.softAP("TCLEDNode"); // This works!!
   pinMode(BUILTIN_LED, OUTPUT); //Initialize the BUILTIN_LED pin as an output
   digitalWrite(BUILTIN_LED, HIGH); // Initialize the BUILTIN_LED pin as off
   pinMode(ledPin1, OUTPUT);     //Set the LED pin
