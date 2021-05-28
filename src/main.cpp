@@ -1,5 +1,3 @@
-
-// #include <Arduino.h>
 /*
    Connect to the network
    Subscribe to multiple MQTT channels
@@ -9,31 +7,30 @@
    mode variable determines the actions taken through the loop statement.
 
 
-GRRRRR I had this running then lost it all in a git upload... thought that was why git existed
-learnign experience that one!
-
-Rewritten and needs to be tested before a clean up is run
+TE May 25 -> see if we can simplify this and use the WiFi Manage r library to add in a way to manage  the MQTT and WiFi connections fomr the device instead of hard coding
+the passwords etc in...
 
 */
-#include <ESP8266WiFi.h>
+#include <Arduino.h>
+#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+//needed for library
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+#include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 #include <PubSubClient.h>
+
 #include "dimmer.h"
-#include "config.h"
+#include "defines.h"
 
-
+// Enable debug prints
+#define MY_DEBUG
 /*
   To add a LDR to pin A0
   Set a variable to record the LDR results if LDR < x then set variable mode to 1 if > x then set to 0
   Aditional Variable ManMQTT boolean allows for the light to be controlled by MQTT messages OR by the LDR!
   Add in WiFi set up that turns off base station transmission
 */
-// Enable debug prints
-#define MY_DEBUG
-
-// delete this section and switch out the comments in config.h if this does not work
-const char* ssid = "dSSIS" ;
-const char* password = "passwd" ;
-const char* mqtt_server = "home" ;
 
 
 WiFiClient espClient;
@@ -63,9 +60,6 @@ int ledState = LOW;
 unsigned long previousMillisLDR = 0;
 const long LDRinterval = 500;
 
-
-
-// void fadeToLevel(int toLevel);
 void fadeToLevel( int toLevel )
 {
 
@@ -110,27 +104,13 @@ void setup_wifi() {
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    if (BUILTIN_LED == HIGH) {
-      digitalWrite(BUILTIN_LED, LOW);
-    } else {
-      digitalWrite(BUILTIN_LED, HIGH);
-    }
-  }
-  #ifdef MY_DEBUG
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-  #endif
+    // // Connect to the local network
+  WiFiManager wifiManager;
+  //and goes into a blocking loop awaiting configuration
+  wifiManager.autoConnect("AutoConnectAP");
+  Serial.println("connected...to network :)");
 
 }
-
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
@@ -149,18 +129,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // May be able to clean this up more with
   // int intPayload = (char*)payload.toInt();  //do the conversion in one line and the strTopic and strPayload ar redundant
 
-
   // This needs to be developed to grab the interger value form the payload and store it as the mode value
   if (strTopic == "home/TC/function") {
     function = intPayload;
     // Serial.print( intPayload );
   }
-
   if (strTopic == "home/TC/modetype") {
     mode = strPayload;  //Likely that this will not work - need ot confirm that boolean and integer types are set up correctly...
     // Serial.print( strPayload );
   }
-
   if (strTopic == "home/TC/LDRLimit") {
     LDRSetValue = intPayload * 10.23;  //grab the % value from the dimer nad convert to a 0-1023 value...
     // Serial.print( intPayload );
@@ -170,7 +147,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     // dimmerTransition();
     // Serial.print( intPayload );
   }
-
 }
 
 void reconnect() {
@@ -189,13 +165,12 @@ void reconnect() {
       client.subscribe("home/TC/LDRLimit");
       client.subscribe("home/TC/Dimmer");
 
-
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 3 seconds before retrying
-      delay(3000);
+      // Wait 5 seconds before retrying
+      delay(5000);
     }
   }
 }
@@ -274,11 +249,9 @@ void automatic() {
 
 
 void setup() {
-   // Add in setup notes to turn off station SSID broadcast
-  WiFi.mode(WIFI_STA); // options WIFI_AP, WIFI_STA, or WIFI_AP_STA
-  //WiFi.softAP("TCLEDNode"); // This works!!
-  pinMode(BUILTIN_LED, OUTPUT); //Initialize the BUILTIN_LED pin as an output
-  digitalWrite(BUILTIN_LED, HIGH); // Initialize the BUILTIN_LED pin as off
+
+  pinMode(LED_BUILTIN, OUTPUT); //Initialize the BUILTIN_LED pin as an output
+  digitalWrite(LED_BUILTIN, HIGH); // Initialize the BUILTIN_LED pin as off
   pinMode(ledPin1, OUTPUT);     //Set the LED pin
 
   pinMode(LDRPin, INPUT);       //Set the LDR as an input

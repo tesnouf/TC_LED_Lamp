@@ -1,6 +1,8 @@
 .pioenvs
 .piolibdeps
+.pio/
+.vscode/
 .clang_complete
 .gcc-flags.json
 backup/
-src/config.h
+src/defines.h
