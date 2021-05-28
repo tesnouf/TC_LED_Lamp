@@ -129,18 +129,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // May be able to clean this up more with
   // int intPayload = (char*)payload.toInt();  //do the conversion in one line and the strTopic and strPayload ar redundant
 
-
   // This needs to be developed to grab the interger value form the payload and store it as the mode value
   if (strTopic == "home/TC/function") {
     function = intPayload;
     // Serial.print( intPayload );
   }
-
   if (strTopic == "home/TC/modetype") {
     mode = strPayload;  //Likely that this will not work - need ot confirm that boolean and integer types are set up correctly...
     // Serial.print( strPayload );
   }
-
   if (strTopic == "home/TC/LDRLimit") {
     LDRSetValue = intPayload * 10.23;  //grab the % value from the dimer nad convert to a 0-1023 value...
     // Serial.print( intPayload );
@@ -150,7 +147,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     // dimmerTransition();
     // Serial.print( intPayload );
   }
-
 }
 
 void reconnect() {
@@ -261,7 +257,7 @@ void setup() {
   pinMode(LDRPin, INPUT);       //Set the LDR as an input
   Serial.begin(115200);
   setup_wifi();
-  client.setServer("omv.local", 1883);
+  client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
   #ifdef MY_DEBUG
