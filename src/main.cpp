@@ -17,13 +17,14 @@ the passwords etc in...
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-// #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
+#include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 #include <PubSubClient.h>
 
 #include "dimmer.h"
 #include "defines.h"
 
-
+// Enable debug prints
+#define MY_DEBUG
 /*
   To add a LDR to pin A0
   Set a variable to record the LDR results if LDR < x then set variable mode to 1 if > x then set to 0
@@ -111,7 +112,6 @@ void setup_wifi() {
 
 }
 
-
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -169,13 +169,12 @@ void reconnect() {
       client.subscribe("home/TC/LDRLimit");
       client.subscribe("home/TC/Dimmer");
 
-
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 3 seconds before retrying
-      delay(3000);
+      // Wait 5 seconds before retrying
+      delay(5000);
     }
   }
 }
@@ -255,14 +254,14 @@ void automatic() {
 
 void setup() {
 
-  pinMode(BUILTIN_LED, OUTPUT); //Initialize the BUILTIN_LED pin as an output
-  digitalWrite(BUILTIN_LED, HIGH); // Initialize the BUILTIN_LED pin as off
+  pinMode(LED_BUILTIN, OUTPUT); //Initialize the BUILTIN_LED pin as an output
+  digitalWrite(LED_BUILTIN, HIGH); // Initialize the BUILTIN_LED pin as off
   pinMode(ledPin1, OUTPUT);     //Set the LED pin
 
   pinMode(LDRPin, INPUT);       //Set the LDR as an input
   Serial.begin(115200);
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
+  client.setServer("omv.local", 1883);
   client.setCallback(callback);
 
   #ifdef MY_DEBUG

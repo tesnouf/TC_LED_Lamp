@@ -1,3 +1,3 @@
 #include "Arduino.h"
 
-const char* mqtt_server = "home" ;
+const char* mqtt_server = "omv.local" ;
